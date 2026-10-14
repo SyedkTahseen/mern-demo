@@ -105,6 +105,8 @@ function App() {
         {error && <p className="error-message" role="alert">{error}</p>}
         {loading ? (
           <p className="empty-state">Loading your tasks...</p>
+        ) : error && tasks.length === 0 ? (
+          <p className="empty-state">Could not load tasks. Check the API connection and try again.</p>
         ) : tasks.length === 0 ? (
           <p className="empty-state">Nothing here yet. Add your first task above.</p>
         ) : (

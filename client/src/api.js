@@ -15,14 +15,31 @@ async function request(path, options = {}) {
     throw new Error("Could not reach the API. Check your connection and try again.");
   }
 
-  const data = await response.json().catch(() => ({}));
+  if (response.status === 204) {
+    return null;
+  }
+
+  const contentType = response.headers.get("content-type") || "";
+  if (!contentType.includes("application/json")) {
+    throw new Error(
+      "The API returned an unexpected response. Check that VITE_API_URL points to your backend service.",
+    );
+  }
+
+  const data = await response.json();
   if (!response.ok) {
     throw new Error(data.error || "The request could not be completed.");
   }
   return data;
 }
 
-export const getTasks = () => request("/tasks");
+export async function getTasks() {
+  const tasks = await request("/tasks");
+  if (!Array.isArray(tasks)) {
+    throw new Error("The API did not return a task list. Check that VITE_API_URL points to your backend service.");
+  }
+  return tasks;
+}
 
 export const createTask = (task) =>
   request("/tasks", { method: "POST", body: JSON.stringify(task) });
@@ -32,4 +49,3 @@ export const updateTask = (id, updates) =>
 
 export const deleteTask = (id) =>
   request(`/tasks/${id}`, { method: "DELETE" });
-
